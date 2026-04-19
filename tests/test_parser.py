@@ -38,3 +38,13 @@ def test_parse_invalid_json_falls_back_to_logfmt():
 def test_parse_logfmt_no_pairs():
     result = _parse_logfmt("no equals sign here")
     assert result is None
+
+
+def test_parse_logfmt_empty_value():
+    """A key with an empty value (key=) should be parsed with an empty string."""
+    line = "level=info msg= code=200"
+    result = _parse_logfmt(line)
+    assert result is not None
+    assert result["msg"] == ""
+    assert result["level"] == "info"
+    assert result["code"] == "200"
