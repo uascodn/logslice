@@ -1,38 +1,34 @@
-"""Human-readable report rendering for Stats."""
-from typing import IO, Optional
+"""Render summary reports from Stats and Aggregator results."""
+from typing import Any, Dict, Optional
+
 from logslice.stats import Stats
 
 
-def render_report(
-    stats: Stats,
-    out: IO,
-    top_fields: Optional[list] = None,
-    top_n: int = 5,
-) -> None:
-    """Write a stats report to *out*.
+def render_report(stats: Stats, agg_results: Optional[Dict[str, Any]] = None) -> str:
+    lines = []
+    lines.append("=== logslice report ===")
+    lines.append(f"  total lines   : {stats.total}")
+    lines.append(f"  matched lines : {stats.matched}")
+    lines.append(f"  dropped lines : {stats.dropped}")
 
-    Args:
-        stats: populated Stats instance.
-        out: writable text stream.
-        top_fields: field names to show top-value breakdown for.
-        top_n: how many top values to show per field.
-    """
-    summary = stats.summary()
-    out.write("=== logslice report ===\n")
-    out.write(f"  total lines  : {summary['total_lines']}\n")
-    out.write(f"  matched lines: {summary['matched_lines']}\n")
-    out.write(f"  dropped lines: {summary['dropped_lines']}\n")
+    for field, counter in stats._counters.items():
+        top = stats.top_values(field, n=5)
+        if not top:
+            continue
+        lines.append(f"  top {field}:")
+        for value, count in top:
+            lines.append(f"    {value!s:<30} {count}")
 
-    fields_to_show = top_fields if top_fields is not None else summary["fields_seen"]
-    if fields_to_show:
-        out.write("\n--- field breakdown ---\n")
-        for field in fields_to_show:
-            top = stats.top_values(field, n=top_n)
-            if not top:
-                continue
-            unique = stats.unique_values(field)
-            out.write(f"  {field} ({unique} unique):\n")
-            for value, count in top:
-                bar = "#" * min(count, 20)
-                out.write(f"    {value:<20} {count:>6}  {bar}\n")
-    out.write("======================\n")
+    if agg_results:
+        lines.append("  aggregations:")
+        for label, result in agg_results.items():
+            lines.append(f"    {label}:")
+            if isinstance(result, dict):
+                for k, v in sorted(result.items(), key=lambda x: str(x[0])):
+                    v_str = f"{v:.4g}" if isinstance(v, float) else str(v)
+                    lines.append(f"      {k!s:<28} {v_str}")
+            else:
+                lines.append(f"      {result}")
+
+    lines.append("=" * 23)
+    return "\n".join(lines)
