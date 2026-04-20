@@ -30,6 +30,10 @@ def test_mask_value_non_string_passthrough():
     assert mask_value(42) == 42
 
 
+def test_mask_value_empty_string():
+    assert mask_value("") == ""
+
+
 def test_mask_field_present():
     rec = {"password": "hunter2", "user": "alice"}
     result = mask_field(rec, "password")
@@ -57,6 +61,12 @@ def test_mask_fields_multiple():
     assert result["c"] == "baz"
 
 
+def test_mask_fields_empty_list():
+    rec = {"a": "foo", "b": "bar"}
+    result = mask_fields(rec, [])
+    assert result == {"a": "foo", "b": "bar"}
+
+
 def test_redact_patterns_email():
     rec = {"msg": "contact user@example.com for help"}
     result = redact_patterns(rec, ["email"])
@@ -80,6 +90,12 @@ def test_redact_patterns_non_string_field_skipped():
     rec = {"count": 5, "msg": "hello"}
     result = redact_patterns(rec)
     assert result["count"] == 5
+
+
+def test_redact_patterns_does_not_mutate():
+    rec = {"msg": "contact user@example.com for help"}
+    redact_patterns(rec, ["email"])
+    assert "user@example.com" in rec["msg"]
 
 
 def test_parse_mask_expr_simple():
