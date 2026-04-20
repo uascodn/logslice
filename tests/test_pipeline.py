@@ -106,6 +106,15 @@ def test_run_pipeline_empty_input():
 def test_run_pipeline_skips_unparseable_lines():
     lines = ["not json or logfmt!!!", LINES[0]]
     args = _args()
-    # Should not raise; parseable lines pass through
+    # Unparseable lines should be silently skipped; only the valid line is returned.
     results = list(run_pipeline(lines, args))
-    assert len(results) >= 1
+    assert len(results) == 1
+    assert "startup" in results[0]
+
+
+def test_run_pipeline_filter_by_service():
+    """Filtering on a non-level field should work the same as filtering on level."""
+    args = _args(filters=["service=worker"])
+    results = list(run_pipeline(LINES, args))
+    assert len(results) == 2
+    assert all("worker" in r for r in results)
