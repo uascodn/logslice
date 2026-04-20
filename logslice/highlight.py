@@ -47,6 +47,16 @@ def highlight_pattern(text: str, pattern: str) -> str:
     return highlighted
 
 
+def strip_ansi(text: str) -> str:
+    """Remove all ANSI escape sequences from a string.
+
+    Useful when writing highlighted output to a file or piping to a tool
+    that does not support terminal colors.
+    """
+    ansi_escape = re.compile(r"\033\[[0-9;]*m")
+    return ansi_escape.sub("", text)
+
+
 def highlight_record(record: dict, search: str = "") -> str:
     """Format a log record with color highlights for level and optional search term."""
     parts = []
