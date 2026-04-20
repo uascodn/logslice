@@ -48,3 +48,21 @@ def test_parse_logfmt_empty_value():
     assert result["msg"] == ""
     assert result["level"] == "info"
     assert result["code"] == "200"
+
+
+def test_parse_logfmt_quoted_value_with_spaces():
+    """Quoted values containing spaces should be returned as a single string."""
+    line = 'host=web-01 msg="disk usage is high" severity=warn'
+    result = _parse_logfmt(line)
+    assert result is not None
+    assert result["host"] == "web-01"
+    assert result["msg"] == "disk usage is high"
+    assert result["severity"] == "warn"
+
+
+def test_parse_logfmt_duplicate_keys():
+    """When duplicate keys appear, the last value should win."""
+    line = "level=info level=debug msg=started"
+    result = _parse_logfmt(line)
+    assert result is not None
+    assert result["level"] == "debug"
