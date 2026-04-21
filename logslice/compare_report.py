@@ -5,6 +5,17 @@ from typing import Iterable
 
 
 def render_compare_report(diff_records: Iterable[dict]) -> str:
+    """Render a human-readable comparison report from diff records.
+
+    Args:
+        diff_records: An iterable of diff record dicts, each containing a
+            ``status`` key (``'only_in_a'``, ``'only_in_b'``, or
+            ``'changed'``), a ``key`` dict identifying the record, and an
+            optional ``diffs`` dict describing per-field changes.
+
+    Returns:
+        A formatted string summarising the differences.
+    """
     lines: list[str] = []
     only_a = only_b = changed = 0
 
