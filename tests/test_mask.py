@@ -67,6 +67,13 @@ def test_mask_fields_empty_list():
     assert result == {"a": "foo", "b": "bar"}
 
 
+def test_mask_fields_does_not_mutate():
+    rec = {"a": "foo", "b": "bar"}
+    mask_fields(rec, ["a", "b"])
+    assert rec["a"] == "foo"
+    assert rec["b"] == "bar"
+
+
 def test_redact_patterns_email():
     rec = {"msg": "contact user@example.com for help"}
     result = redact_patterns(rec, ["email"])
@@ -112,3 +119,11 @@ def test_parse_mask_expr_with_keep():
 def test_parse_mask_expr_with_char():
     result = parse_mask_expr("secret:char=X")
     assert result["char"] == "X"
+
+
+def test_parse_mask_expr_with_keep_and_char():
+    """Ensure both keep and char options can be parsed together."""
+    result = parse_mask_expr("apikey:keep=2:char=#")
+    assert result["field"] == "apikey"
+    assert result["keep"] == 2
+    assert result["char"] == "#"
