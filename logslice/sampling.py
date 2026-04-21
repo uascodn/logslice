@@ -29,8 +29,18 @@ def parse_sample_expr(expr: str) -> dict:
     Returns a dict with keys 'mode' and 'value':
       - {'mode': 'every', 'value': N}
       - {'mode': 'fraction', 'value': f}
+
+    Supported formats:
+      - ``every:N``  – keep every Nth record (e.g. ``every:4``)
+      - ``N/D``      – keep a N-in-D fraction (e.g. ``1/10``)
+      - ``P%``       – keep P percent of records (e.g. ``5%``)
+      - ``N``        – bare integer, equivalent to ``every:N``
+
+    Raises ValueError for unrecognisable or out-of-range expressions.
     """
     expr = expr.strip()
+    if not expr:
+        raise ValueError("sample expression must not be empty")
     if expr.startswith("every:"):
         n = int(expr[len("every:"):])
         return {"mode": "every", "value": n}
