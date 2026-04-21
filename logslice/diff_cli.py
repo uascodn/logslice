@@ -43,12 +43,20 @@ def build_diff_parser() -> argparse.ArgumentParser:
 
 
 def _read_records(path: str) -> List[dict]:
+    """Read and parse all valid log records from *path*.
+
+    Raises:
+        SystemExit: if the file cannot be opened, with a user-friendly message.
+    """
     records = []
-    with open(path) as fh:
-        for line in fh:
-            rec = parse_line(line)
-            if rec is not None:
-                records.append(rec)
+    try:
+        with open(path) as fh:
+            for line in fh:
+                rec = parse_line(line)
+                if rec is not None:
+                    records.append(rec)
+    except OSError as exc:
+        sys.exit(f"logslice-diff: error reading '{path}': {exc.strerror}")
     return records
 
 
