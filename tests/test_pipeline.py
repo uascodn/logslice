@@ -113,7 +113,7 @@ def test_run_pipeline_skips_unparseable_lines():
 
 
 def test_run_pipeline_filter_by_service():
-    """Filtering on a non-level field should work the same as filtering on level."""
+    """Filter on a non-level field to verify generic key=value filtering works."""
     args = _args(filters=["service=worker"])
     results = list(run_pipeline(LINES, args))
     assert len(results) == 2
